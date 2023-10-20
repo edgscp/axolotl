@@ -14,7 +14,7 @@ RUN apt-get update && \
 
 WORKDIR /workspace
 
-RUN git clone --depth=1 https://github.com/edgscp/axolotl.git
+RUN git clone --depth=1 https://github.com/edgscp/axolotl.git && git checkout -b classilex-3 origin/classilex-3
 
 WORKDIR /workspace/axolotl
 
