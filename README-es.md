@@ -7,4 +7,4 @@ docker push david1155/axolotl-base:main-base
 docker build -t david1155/axolotl:classilex-3 -f Dockerfile .
 docker push david1155/axolotl:classilex-3
 
-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
+docker run --ipc=host --gpus all -it -v /data:/data david1155/axolotl:classilex-3
