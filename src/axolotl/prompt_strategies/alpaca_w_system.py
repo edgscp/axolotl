@@ -178,7 +178,7 @@ def load_open_orca_chatml(tokenizer, cfg):
     )
 
 def load_classilex(tokenizer, cfg):
-    return OpenOrcaPromptTokenizingStrategy(
+    return ClassilexPromptTokenizingStrategy(
         OpenOrcaSystemDataPrompter(PromptStyle.CLASSILEX.value),
         tokenizer,
         cfg.train_on_inputs,
