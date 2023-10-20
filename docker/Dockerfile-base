@@ -71,4 +71,4 @@ RUN git lfs install --skip-repo
 RUN pip3 install awscli && \
     # The base image ships with `pydantic==1.8.2` which is not working
     pip3 install -U --no-cache-dir pydantic==1.10.10
-RUN pip3 install -U --no-cache-dir packaging ninja-build ninja && git clone https://github.com/Dao-AILab/flash-attention.git && cd flash-attention && python setup.py install
+RUN pip3 install -U --no-cache-dir packaging ninja && git clone https://github.com/Dao-AILab/flash-attention.git && cd flash-attention && python setup.py install
