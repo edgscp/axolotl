@@ -107,7 +107,10 @@ class OpenOrcaSystemDataPrompter(SystemDataPrompter):
                 "<|im_start|>user\n{instruction}<|im_end|>\n<|im_start|>assistant\n"
             )
             self.system_format = "<|im_start|>system\n{system}<|im_end|>\n"
-
+        if self.prompt_style == PromptStyle.CLASSILEX.value:
+            self.turn_format = "<|prompter|>{instruction}\n{input}\n</s><|assistant|>"
+            self.turn_no_input_format = "<|prompter|>{instruction}\n</s><|assistant|>"
+            self.system_format = "{system}"
 
 class OpenOrcaPromptTokenizingStrategy(InstructionWSystemPromptTokenizingStrategy):
     """
@@ -122,6 +125,18 @@ class OpenOrcaPromptTokenizingStrategy(InstructionWSystemPromptTokenizingStrateg
             prompt["system_prompt"],
         )
 
+class ClassilexPromptTokenizingStrategy(InstructionWSystemPromptTokenizingStrategy):
+    """
+    Tokenizing strategy for OpenOrca datasets
+    """
+
+    def parse_instruction_fields(self, prompt) -> Tuple[str, str, str, str]:
+        return (
+            prompt["json"],
+            prompt["input"],
+            prompt["response"],
+            "",
+        )
 
 def load(tokenizer, cfg):
     return load_chat(tokenizer, cfg)
@@ -157,6 +172,14 @@ def load_open_orca(tokenizer, cfg):
 def load_open_orca_chatml(tokenizer, cfg):
     return OpenOrcaPromptTokenizingStrategy(
         OpenOrcaSystemDataPrompter(PromptStyle.CHATML.value),
+        tokenizer,
+        cfg.train_on_inputs,
+        cfg.sequence_len,
+    )
+
+def load_classilex(tokenizer, cfg):
+    return OpenOrcaPromptTokenizingStrategy(
+        OpenOrcaSystemDataPrompter(PromptStyle.CLASSILEX.value),
         tokenizer,
         cfg.train_on_inputs,
         cfg.sequence_len,

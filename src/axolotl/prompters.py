@@ -18,6 +18,7 @@ class PromptStyle(Enum):
     INSTRUCT = "instruct"
     CHAT = "chat"
     CHATML = "chatml"
+    CLASSILEX="classilex"
 
 
 class AlpacaPrompter:
