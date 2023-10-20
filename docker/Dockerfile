@@ -16,7 +16,6 @@ WORKDIR /workspace
 
 RUN git clone https://github.com/edgscp/axolotl.git && \
     cd axolotl && \
-    git fetch origin classilex-3 && \
     git checkout -b classilex-3 origin/classilex-3
 
 WORKDIR /workspace/axolotl
