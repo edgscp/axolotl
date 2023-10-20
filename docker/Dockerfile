@@ -20,6 +20,8 @@ RUN git clone https://github.com/edgscp/axolotl.git && \
 
 WORKDIR /workspace/axolotl
 
+RUN pip uninstall -y ninja && pip install ninja
+
 # If AXOLOTL_EXTRAS is set, append it in brackets
 RUN sed -i "s/torch==.*/torch==$PYTORCH_VERSION/" requirements.txt
 RUN if [ "$AXOLOTL_EXTRAS" != "" ] ; then \
