@@ -1,6 +1,6 @@
 --extra-index-url https://download.pytorch.org/whl/cu118
 --extra-index-url https://huggingface.github.io/autogptq-index/whl/cu118/
-torch==2.0.1
+torch==2.1.0
 auto-gptq
 packaging
 peft @ git+https://github.com/huggingface/peft.git

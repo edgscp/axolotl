@@ -1,11 +1,11 @@
 ARG BASE_TAG=main-base
-FROM winglian/axolotl-base:$BASE_TAG
+FROM david1155/axolotl-base:$BASE_TAG
 
 ARG TORCH_CUDA_ARCH_LIST="7.0 7.5 8.0 8.6+PTX"
 ARG AXOLOTL_EXTRAS=""
 ARG CUDA="118"
 ENV BNB_CUDA_VERSION=$CUDA
-ARG PYTORCH_VERSION="2.0.1"
+ARG PYTORCH_VERSION="2.1.0"
 
 ENV PYTORCH_VERSION=$PYTORCH_VERSION
 
@@ -14,7 +14,7 @@ RUN apt-get update && \
 
 WORKDIR /workspace
 
-RUN git clone --depth=1 https://github.com/OpenAccess-AI-Collective/axolotl.git
+RUN git clone --depth=1 https://github.com/edgscp/axolotl.git
 
 WORKDIR /workspace/axolotl
 
