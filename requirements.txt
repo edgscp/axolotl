@@ -4,9 +4,9 @@ torch==2.1.0
 auto-gptq
 packaging
 peft @ git+https://github.com/huggingface/peft.git
-transformers @ git+https://github.com/huggingface/transformers.git@acc394c4f5e1283c19783581790b3dc3105a3697
+transformers @ git+https://github.com/huggingface/transformers.git
 bitsandbytes>=0.41.1
-accelerate @ git+https://github.com/huggingface/accelerate@80da9cfb09bb3cc9f1b385cb55d6b90d025a5fd9
+accelerate @ git+https://github.com/huggingface/accelerate
 deepspeed
 addict
 fire
