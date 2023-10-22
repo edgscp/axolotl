@@ -22,6 +22,16 @@ WORKDIR /workspace/axolotl
 
 RUN pip uninstall -y ninja && pip install ninja
 
+RUN git clone https://github.com/google/sentencepiece.git && \
+    cd sentencepiece && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DSPM_ENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=./root && \
+    make install && \
+    cd ../python && \
+    python setup.py bdist_wheel && \
+    pip install dist/sentencepiece*.whl
+
 # If AXOLOTL_EXTRAS is set, append it in brackets
 RUN sed -i "s/torch==.*/torch==$PYTORCH_VERSION/" requirements.txt
 RUN if [ "$AXOLOTL_EXTRAS" != "" ] ; then \
