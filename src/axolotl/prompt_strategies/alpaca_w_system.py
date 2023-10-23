@@ -175,7 +175,7 @@ class ClassilexPromptTokenizingStrategy(PromptTokenizingStrategy):
 
         user_prompt = next(
             iter(
-                self.prompter.build_classilex_prompt(
+                self.prompter.build_prompt(
                     previous_response,
                     input,
                     output
