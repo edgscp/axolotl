@@ -86,37 +86,6 @@ class SystemDataPrompter(AlpacaPrompter):
         yield res
 
 
-class ClassilexDataPrompter(ClassilexPrompter):
-    """
-    Alpaca Style Prompter that uses system prompts from the dataset
-    """
-
-    def build_classilex_prompt(
-        self,
-        previous_response: Union[None, str] = None,
-        input: Union[None, str] = None,  # pylint: disable=redefined-builtin
-        output: Union[None, str] = None,
-    ) -> Generator[str, None, None]:
-        # returns the full prompt from instruction and optional input
-        # if a label (=response, =output) is provided, it's also appended.
-
-        if previous_response:
-            res = "" + self.turn_format.format(
-                previous_response=previous_response, input=input
-            )
-        else:
-            res = "" + self.turn_no_previous_response_format.format(
-                input=input
-            )
-        if output:
-            res = f"{res}{output}"
-
-        if output_logs():
-            LOG.info(res)
-
-        yield res
-
-
 class OpenOrcaSystemDataPrompter(SystemDataPrompter):
     """
     Alpaca Style Prompter that uses system prompts from the dataset, with OpenOrca prompts
@@ -152,6 +121,37 @@ class OpenOrcaPromptTokenizingStrategy(InstructionWSystemPromptTokenizingStrateg
             prompt["response"],
             prompt["system_prompt"],
         )
+
+
+class ClassilexDataPrompter(ClassilexPrompter):
+    """
+    Alpaca Style Prompter that uses system prompts from the dataset
+    """
+
+    def build_classilex_prompt(
+        self,
+        previous_response: Union[None, str] = None,
+        input: Union[None, str] = None,  # pylint: disable=redefined-builtin
+        output: Union[None, str] = None,
+    ) -> Generator[str, None, None]:
+        # returns the full prompt from instruction and optional input
+        # if a label (=response, =output) is provided, it's also appended.
+
+        if previous_response:
+            res = "" + self.turn_format.format(
+                previous_response=previous_response, input=input
+            )
+        else:
+            res = "" + self.turn_no_previous_response_format.format(
+                input=input
+            )
+        if output:
+            res = f"{res}{output}"
+
+        if output_logs():
+            LOG.info(res)
+
+        yield res
 
 
 class ClassilexPromptTokenizingStrategy(PromptTokenizingStrategy):
