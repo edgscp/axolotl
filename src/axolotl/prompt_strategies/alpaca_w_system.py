@@ -4,7 +4,7 @@ Prompt strategies loader for alpaca instruction datasets with system prompts
 from typing import Generator, Tuple, Union
 
 from axolotl.prompt_tokenizers import PromptTokenizingStrategy
-from axolotl.prompters import AlpacaPrompter, PromptStyle
+from axolotl.prompters import AlpacaPrompter, PromptStyle, ClassilexPrompter, output_logs, LOG
 
 
 class InstructionWSystemPromptTokenizingStrategy(PromptTokenizingStrategy):
@@ -107,10 +107,7 @@ class OpenOrcaSystemDataPrompter(SystemDataPrompter):
                 "<|im_start|>user\n{instruction}<|im_end|>\n<|im_start|>assistant\n"
             )
             self.system_format = "<|im_start|>system\n{system}<|im_end|>\n"
-        if self.prompt_style == PromptStyle.CLASSILEX.value:
-            self.turn_format = "<|prompter|>{instruction}\n{input}\n</s><|assistant|>"
-            self.turn_no_input_format = "<|prompter|>{instruction}\n</s><|assistant|>"
-            self.system_format = "{system}"
+
 
 class OpenOrcaPromptTokenizingStrategy(InstructionWSystemPromptTokenizingStrategy):
     """
@@ -125,18 +122,80 @@ class OpenOrcaPromptTokenizingStrategy(InstructionWSystemPromptTokenizingStrateg
             prompt["system_prompt"],
         )
 
-class ClassilexPromptTokenizingStrategy(InstructionWSystemPromptTokenizingStrategy):
+
+class ClassilexDataPrompter(ClassilexPrompter):
+    """
+    Alpaca Style Prompter that uses system prompts from the dataset
+    """
+
+    def build_classilex_prompt(
+        self,
+        previous_response: Union[None, str] = None,
+        input: Union[None, str] = None,  # pylint: disable=redefined-builtin
+        output: Union[None, str] = None,
+    ) -> Generator[str, None, None]:
+        # returns the full prompt from instruction and optional input
+        # if a label (=response, =output) is provided, it's also appended.
+
+        if previous_response:
+            res = "" + self.turn_format.format(
+                previous_response=previous_response, input=input
+            )
+        else:
+            res = "" + self.turn_no_previous_response_format.format(
+                input=input
+            )
+        if output:
+            res = f"{res}{output}"
+
+        if output_logs():
+            LOG.info(res)
+
+        yield res
+
+
+class ClassilexPromptTokenizingStrategy(PromptTokenizingStrategy):
     """
     Tokenizing strategy for OpenOrca datasets
     """
 
-    def parse_instruction_fields(self, prompt) -> Tuple[str, str, str, str]:
+    def parse_instruction_fields(self, prompt) -> Tuple[str, str, str]:
         return (
-            prompt["json"],
+            prompt["previous_response"],
             prompt["input"],
-            prompt["response"],
-            "",
+            prompt["output"]
         )
+
+    def tokenize_prompt(self, prompt):
+        (
+            previous_response,
+            input,
+            output,
+        ) = self.parse_instruction_fields(prompt)
+
+        user_prompt = next(
+            iter(
+                self.prompter.build_classilex_prompt(
+                    previous_response,
+                    input,
+                    output
+                )
+            )
+        )
+        tokenized_prompt = self._tokenize(user_prompt, add_eos_token=False)
+        if not self.train_on_inputs:
+            user_prompt_len = len(tokenized_prompt["input_ids"])
+            # TODO this could be sped up using numpy array slicing
+            tokenized_prompt["labels"] = [-100] * user_prompt_len
+        tokenized_res_prompt = self._tokenize(
+            output, strip_bos_token=True, add_eos_token=True
+        )
+        tokenized_prompt["input_ids"] += tokenized_res_prompt["input_ids"]
+        tokenized_prompt["attention_mask"] += tokenized_res_prompt["attention_mask"]
+        tokenized_prompt["labels"] += tokenized_res_prompt["input_ids"]
+
+        return tokenized_prompt
+
 
 def load(tokenizer, cfg):
     return load_chat(tokenizer, cfg)
@@ -177,9 +236,10 @@ def load_open_orca_chatml(tokenizer, cfg):
         cfg.sequence_len,
     )
 
+
 def load_classilex(tokenizer, cfg):
     return ClassilexPromptTokenizingStrategy(
-        OpenOrcaSystemDataPrompter(PromptStyle.CLASSILEX.value),
+        ClassilexPrompter(PromptStyle.CLASSILEX.value),
         tokenizer,
         cfg.train_on_inputs,
         cfg.sequence_len,

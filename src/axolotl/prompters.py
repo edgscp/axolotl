@@ -1,6 +1,6 @@
 """Module containing prompters"""
-
 import logging
+import os
 from enum import Enum
 from typing import Generator, Optional, Union
 
@@ -18,7 +18,7 @@ class PromptStyle(Enum):
     INSTRUCT = "instruct"
     CHAT = "chat"
     CHATML = "chatml"
-    CLASSILEX="classilex"
+    CLASSILEX = "classilex"
 
 
 class AlpacaPrompter:
@@ -55,10 +55,6 @@ class AlpacaPrompter:
                 "<|im_start|>user\n{instruction}<|im_end|>\n<|im_start|>assistant\n"
             )
             self.system_format = "<|im_start|>system\n{system}<|im_end|>\n"
-        if self.prompt_style == PromptStyle.CLASSILEX.value:
-            self.turn_format = "<|prompter|>{instruction}\n{input}\n</s><|assistant|>"
-            self.turn_no_input_format = "<|prompter|>{instruction}\n</s><|assistant|>"
-            self.system_format = "{system}"
 
     def build_prompt(
         self,
@@ -309,3 +305,46 @@ class ShareGPTPrompterV2(ShareGPTPrompter):
             role_key_human=role_key_human,
             role_key_model=role_key_model,
         )
+
+
+def output_logs():
+    env_value = os.environ.get('LOG_OUTPUT')
+    if env_value == 'true':
+        return True
+    return False
+
+
+class ClassilexPrompter:
+    """
+    Base class for classilex prompters
+    """
+
+    turn_format: str
+    turn_no_previous_response_format: str
+    prompt_style: Optional[PromptStyle] = None
+
+    def __init__(self, prompt_style):
+        self.prompt_style = prompt_style if prompt_style else PromptStyle.CLASSILEX.value
+        self.match_prompt_style()
+
+    def match_prompt_style(self):
+        self.turn_format = "<|INPUT_JSON|>{previous_response}\n<|OPINION_TEXT|>{input}\n</s><|JSON|>"
+        self.turn_no_previous_response_format = "<|OPINION_TEXT|>{input}\n</s><|JSON|>"
+
+    def build_prompt(
+        self,
+        previous_response: Union[None, str] = None,
+        input: Union[None, str] = None,
+        output: Union[None, str] = None,
+    ) -> Generator[str, None, None]:
+        if previous_response:
+            res = "" + self.turn_format.format(previous_response=previous_response, input=input)
+        else:
+            res = "" + self.turn_no_previous_response_format.format(input=input)
+        if output:
+            res = f"{res}{output}"
+
+        if output_logs():
+            LOG.info(res)
+
+        yield res
