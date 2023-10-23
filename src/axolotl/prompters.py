@@ -55,10 +55,6 @@ class AlpacaPrompter:
                 "<|im_start|>user\n{instruction}<|im_end|>\n<|im_start|>assistant\n"
             )
             self.system_format = "<|im_start|>system\n{system}<|im_end|>\n"
-        if self.prompt_style == PromptStyle.CLASSILEX.value:
-            self.turn_format = "<|prompter|>{instruction}\n{input}\n</s><|assistant|>"
-            self.turn_no_input_format = "<|prompter|>{instruction}\n</s><|assistant|>"
-            self.system_format = "{system}"
 
     def build_prompt(
         self,
